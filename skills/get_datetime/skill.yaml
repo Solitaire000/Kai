@@ -1,0 +1,9 @@
+name: get_datetime
+description: "获取当前的日期、时间、星期几。用户问'今天几号''现在几点''星期几'时用这个。"
+category: system
+dangerous: false
+parameters:
+  type: object
+  properties: {}
+  required: []
+preview_template: "查询当前日期时间"

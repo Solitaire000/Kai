@@ -1,0 +1,27 @@
+{
+  "lineage": [
+    {
+      "version": "v1",
+      "base_model": "ibm-granite/granite-4.1-3b",
+      "base_model_path": "ibm-granite/granite-4.1-3b",
+      "path": "data\\adapters\\granite-4.1-3b\\v1",
+      "num_distilled_samples": 14,
+      "corpus_composition": {
+        "identity_anchors": 6,
+        "profile_samples": 0,
+        "refined_corpus": 0,
+        "self_distillation": 0,
+        "raw_samples": 14,
+        "total_before_dedup": 20,
+        "total_after_dedup": 19
+      },
+      "total_samples": 19,
+      "trained_at": 1785915777.1575615,
+      "training_time_seconds": 2419.684258699417,
+      "base_model_changed_from_prev": false,
+      "prev_version": null,
+      "prev_base_model": null,
+      "notes": ""
+    }
+  ]
+}

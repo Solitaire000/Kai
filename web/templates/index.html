@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>{{ agent_name }} · {{ agent_en }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 顶部条：手机上折叠成这一条，桌面上是侧栏顶部 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot" id="linkDot"></span>
+      <span class="brand-name">{{ agent_name }}</span>
+      <span class="brand-en">// {{ agent_en }}</span>
+    </div>
+    <button class="icon-btn" id="panelToggle" aria-label="模型与状态面板" title="模型 / 状态">⋮</button>
+  </header>
+
+  <div class="body">
+
+    <!-- 侧栏：模型选择 + 状态 -->
+    <aside class="panel" id="sidePanel">
+      <div class="panel-section">
+        <div class="panel-label">当前模型</div>
+        <select id="modelSelect" class="model-select"></select>
+        <div class="model-hint" id="modelHint"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">语音</div>
+        <label class="toggle-row">
+          <span>自动朗读回复</span>
+          <input type="checkbox" id="ttsToggle">
+        </label>
+        <div class="model-hint" id="voiceHint">按住麦克风按钮说话</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">已启用技能</div>
+        <div id="skillsList" class="skills-list">加载中…</div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">系统状态</div>
+        <pre id="statusBox" class="status-box">加载中…</pre>
+        <button class="ghost-btn" id="refreshStatus">刷新状态</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-label">让{{ agent_name }}记住一件事</div>
+        <input id="rememberKey" class="text-input" placeholder="比如: 专业方向">
+        <input id="rememberValue" class="text-input" placeholder="比如: GSG探针视觉检测">
+        <button class="ghost-btn" id="rememberBtn">记住</button>
+      </div>
+    </aside>
+
+    <!-- 主聊天区 -->
+    <main class="chat-area">
+      <div class="chat-log" id="chatLog">
+        <div class="msg system">
+          <div class="msg-tag">system</div>
+          <div class="msg-text">你好，我是{{ agent_name }}。左上角 ⋮ 可以手动选模型；也可以直接开始聊天，我会自动挑合适的模型回答，失败会降级到本地模型。</div>
+        </div>
+      </div>
+
+      <form class="composer" id="composer">
+        <button type="button" class="mic-btn" id="micBtn" title="按住说话">🎙</button>
+        <textarea id="inputBox" class="input-box" placeholder="输入任务，例如：分析数据、控制设备、调用技能…" rows="1"></textarea>
+        <button type="submit" class="send-btn" id="sendBtn">发送</button>
+      </form>
+    </main>
+
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

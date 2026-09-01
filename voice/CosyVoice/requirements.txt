@@ -1,0 +1,24 @@
+# voice/ 文件夹自身的额外依赖
+# CosyVoice 本体的依赖在 CosyVoice 仓库的 requirements.txt 里单独安装,见 README.md
+
+# CosyVoice依赖预装库
+setuptools==81.0.0
+wheel
+
+
+modelscope
+torchcodec
+
+fastapi
+uvicorn
+python-multipart
+pyyaml
+modelscope
+
+# 提前安装最新版的库，避免之后安装低版本时报错
+openai-whisper
+--pre
+--index-url https://download.pytorch.org/whl/nightly/cu128
+torch
+torchvision
+torchaudio

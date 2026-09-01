@@ -1,0 +1,12 @@
+name: open_path
+description: "用系统默认程序打开一个文件、文件夹或网址。比如打开一个网页、打开工作区里的某个文档。会启动外部程序，需要用户确认。"
+category: system
+dangerous: true
+parameters:
+  type: object
+  properties:
+    target:
+      type: string
+      description: "要打开的文件路径（相对工作区）、或完整的 http(s):// 网址"
+  required: ["target"]
+preview_template: "打开: {target}"

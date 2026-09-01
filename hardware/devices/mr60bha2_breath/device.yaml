@@ -1,0 +1,13 @@
+name: mr60bha2
+description: "Seeed MR60BHA2 60GHz毫米波呼吸心率传感器 + 板载LED（XIAO ESP32C6主控，USB连接PC）"
+connection: usb-serial
+# XIAO ESP32C6 原生USB CDC常见的VID/PID（Espressif默认值）。自动识别不一定
+# 100%准确，识别不到设备时，在 config.yaml 的 hardware.mr60bha2.port 里
+# 手动指定端口号（比如 "COM5" 或 "/dev/ttyACM0"）即可，手动指定优先级更高。
+vid: 0x303A
+pid: 0x1001
+baud: 115200
+category: biometric_sensor
+# 这块板子同时暴露两个工具：read_vital_signs（读传感器）、set_led（控制LED）。
+# 后者的具体颜色/时机完全由Kai自己决定，固件不含任何自动联动规则，
+# 详见 HARDWARE_ARCHITECTURE.md。

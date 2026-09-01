@@ -1,0 +1,15 @@
+name: run_command
+description: "在这台电脑上执行一条shell命令并返回输出。默认整个关闭，需要在config.yaml里手动开启，且只有匹配白名单正则的命令才会被允许执行。谨慎使用。"
+category: system
+dangerous: true
+# 注意：这个技能是否可用，实际由 config/config.yaml 里的 skills.run_command.enabled 控制
+# （默认 false）。这里不重复定义开关，避免两处配置打架。
+parameters:
+  type: object
+  properties:
+    command:
+      type: string
+      description: "要执行的shell命令，比如 dir 或 ls -la"
+  required: ["command"]
+preview_template: "执行命令: {command}"
+

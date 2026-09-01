@@ -1,0 +1,21 @@
+# ---- Core dependencies (required) ----
+openai>=1.40.0
+pyyaml>=6.0
+requests>=2.31.0
+numpy>=1.24.0
+
+# ---- Web UI (chat窗口 + 模型选择 + 浏览器语音，桌面/手机通用) ----
+flask>=3.0.0
+
+# ---- 硬件设备接入（USB转串口通信，config.yaml -> hardware.enabled 打开时才用到）----
+pyserial>=3.5
+
+
+# ---- Offline local model support ----
+# llama-cpp-python is installed separately by setup_env.bat using a prebuilt
+# wheel index (avoids building from source, which hits Windows path-length
+# limits due to deeply nested vendored files). Not listed here on purpose.
+
+# ---- Better semantic memory quality (optional) ----
+# Works without it too (falls back to hash-based vectors), but quality is much better with it
+# sentence-transformers>=2.7.0

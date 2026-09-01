@@ -1,0 +1,12 @@
+name: list_dir
+description: "列出工作区内某个目录下的文件和子目录。path留空表示列出工作区根目录。"
+category: filesystem
+dangerous: false
+parameters:
+  type: object
+  properties:
+    path:
+      type: string
+      description: "相对于工作区根目录的目录路径，留空表示根目录"
+  required: []
+preview_template: "列出目录: {path}"

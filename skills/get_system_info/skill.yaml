@@ -1,0 +1,9 @@
+name: get_system_info
+description: "获取当前这台电脑的系统信息：操作系统、CPU核心数、内存占用、磁盘剩余空间。用户问'电脑还剩多少存储空间''内存够不够用'时用这个。"
+category: system
+dangerous: false
+parameters:
+  type: object
+  properties: {}
+  required: []
+preview_template: "查询系统信息（操作系统/CPU/内存/磁盘）"

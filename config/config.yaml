@@ -1,0 +1,166 @@
+# ============================================================
+# 小K (Kai) 配置文件
+# 所有可变参数集中在这里，换模型/换硬盘/换电脑都不用改代码
+# ============================================================
+
+agent:
+  name: "小K"
+  english_name: "Kai"
+  # 主控在决定"这个任务复杂不复杂"时的粗略阈值（越大越倾向用便宜模型）
+  simple_task_max_len: 200
+
+# ---------------- 模型路由配置 ----------------
+model:
+  # 在线服务商，按顺序尝试。每一项都用 OpenAI 兼容接口调用。
+  # api_key 从环境变量读取，不要写在这个文件里（避免硬盘丢了泄露key）
+  online_providers:
+    - name: siliconflow
+      base_url: "https://api.siliconflow.cn/v1"
+      api_key_env: "SILICONFLOW_API_KEY"
+      model: "deepseek-ai/DeepSeek-V3"
+      tier: "cheap"          # cheap = 日常任务优先用
+      enabled: true
+
+    - name: openrouter_qwen
+      base_url: "https://openrouter.ai/api/v1"
+      api_key_env: "OPENROUTER_API_KEY"
+      model: "openai/gpt-oss-20b:free"
+      tier: "cheap"
+      enabled: true
+
+    - name: glm
+      base_url: "https://open.bigmodel.cn/api/paas/v4"
+      api_key_env: "ZHIPU_API_KEY"
+      model: "GLM-4.7-Flash"
+      tier: "cheap"
+      enabled: true
+
+    - name: anthropic
+      base_url: "https://api.anthropic.com/v1"
+      api_key_env: "ANTHROPIC_API_KEY"
+      model: "claude-sonnet-4-6"
+      tier: "premium"         # premium = 只有标记为复杂任务才会用，控制成本
+      enabled: false          # 默认关闭，你配好key后手动打开
+      
+    - name: deepseek-v4-flash
+      base_url: "https://api.deepseek.com"
+      api_key_env: "Deepseek-v4-flash_API_KEY"
+      model: "deepseek-v4-flash"
+      tier: "premium"         # premium = 只有标记为复杂任务才会用，控制成本
+      enabled: true          # 默认关闭，你配好key后手动打开      
+
+  # ---------------- 本地离线兜底模型 ----------------
+  # 断网 / 所有在线服务商都失败时自动切换到这里
+  local_fallback:
+    enabled: true
+    # 默认用 1.5B（约1GB，CPU可跑），由 scripts/bootstrap_local_model.py 首次自动下载，
+    # 保证"完全不接入任何外部模型"时也有开箱可用的基础推理能力。
+    # 电脑性能尚可可以手动换成 Qwen2.5-3B-Instruct-GGUF（约2GB，能力更强但更慢）。
+    model_path: "data/models/qwen2.5-3b-instruct-q4_k_m.gguf"
+    n_ctx: 4096
+    n_threads: 0        # 0 = 自动检测CPU核心数
+    n_gpu_layers: -1    # -1 = 若检测到可用GPU则自动尽量卸载层数; 纯CPU电脑会自动退化为0
+    max_tokens: 800
+
+# ---------------- 联网检测 ----------------
+network:
+  check_urls:
+    - "https://www.baidu.com"
+    - "https://www.aliyun.com"
+  timeout_seconds: 3
+  # 每次对话前都探测太浪费，缓存这么多秒
+  cache_seconds: 30
+
+# ---------------- 记忆系统 ----------------
+memory:
+  db_path: "memory/memory.db"
+  vector_db_path: "memory/vector_store"
+  # 本地嵌入模型不存在时，自动退化为轻量哈希向量（能跑但检索质量较低）
+  local_embedding_model_path: "data/models/bge-small-zh-v1.5"
+  # 每隔多少轮对话，主控尝试从对话中提炼一次"画像记忆"更新
+  profile_update_every_n_turns: 6
+  # 语义检索时召回多少条相关记忆
+  top_k_recall: 5
+
+# ---------------- Skills（让小K在一定权限下操作电脑） ----------------
+# 详细说明见 skills/README.md（怎么加新技能）
+skills:
+  enabled: true                       # 总开关，关掉就完全不加载任何技能，模型只能纯聊天
+  workspace_root: "data/workspace"    # 文件类技能的沙盒根目录，默认只能读写这里面
+  allow_full_disk_access: false       # true=文件技能可以访问workspace_root之外的任意路径（不建议开）
+  auto_confirm: false                 # 危险：true=跳过所有"需要确认"的技能直接执行，不要轻易开
+  # enabled_skills 留空/删掉 = 加载 skills/ 目录下所有技能；也可以填一个列表只启用其中几个：
+  # enabled_skills: ["get_datetime", "read_file", "list_dir"]
+  max_tool_iterations: 10              # 一轮对话里最多连续调用几次工具，防止死循环
+
+  # run_command 是最危险的技能（能执行任意shell命令），默认整个关闭。
+  # 确实需要的话手动打开，并且务必配好白名单正则，不要图省事写成 ".*"
+  run_command:
+    enabled: false
+    allowlist_pattern: "^(dir|ls|echo|type|cat|pwd|ipconfig|ifconfig|whoami|date)\\b"
+    timeout_seconds: 15
+
+# ---------------- 硬件设备接入 ----------------
+# 详见 docs/HARDWARE_ARCHITECTURE.md 和 hardware/README.md。硬件设备的连接
+# （比如串口）全部在后台线程里做，不会阻塞聊天，这个总开关关掉时
+# hardware/devices/ 下的东西完全不会被扫描/加载，不影响任何其它功能。
+hardware:
+  enabled: true                      # 总开关，默认关闭（没接硬件的人完全不受影响）
+  # enabled_devices 留空/删掉 = 尝试加载 hardware/devices/ 下所有设备；
+  # 也可以填一个列表只启用其中几个：
+  # enabled_devices: ["mr60bha2"]
+  auto_confirm: false                 # 危险：true=硬件的"危险"操作(如果以后有执行器类硬件)跳过确认直接执行
+
+  # 下面每一项对应一个 hardware/devices/<name>/device.yaml 里的 name，
+  # 用来覆盖该设备的连接参数。多数情况下不需要动，除非自动识别端口失败。
+  mr60bha2:
+    enabled: true
+    port: "COM4"                    # 自动按VID/PID识别失败时，手动填具体串口号，
+                                       # 比如 Windows 下 "COM5"，Linux/Mac 下 "/dev/ttyACM0"；
+                                       # 填了这个之后优先级最高，不会再走自动识别
+
+# ---------------- 训练数据采集 / 本地核心模型迭代 ----------------
+# 详见 README_TRAINING.md。这里只控制"数据怎么攒"，真正的 LoRA 训练是
+# 离线脚本 train/train_lora.py，不在对话进程里跑，不会拖慢日常使用。
+training:
+  enabled: true                        # 总开关，关掉=完全不记录任何蒸馏样本
+  db_path: "memory/training_samples.db"  # 和 memory.db 分开存，职责不同：
+                                        # memory.db 是"给检索用的记忆"，
+                                        # training_samples.db 是"给训练用的语料"
+  # LoRA 训练相关（train/train_lora.py 读取，需要装 requirements-train.txt）
+  lora:
+  
+    # base_model:"厂商名/模型名"              示例
+    base_model: "ibm-granite/granite-4.1-3b"   # 本地模型或者下载在线模型
+    adapter_dir: "data/adapters"             # 每次训练产出一个版本目录 <base_model>/vN/
+    identity_anchors_path: "memory/identity/identity_anchors.jsonl"  # 手写身份锚定语料，
+                                              # 每次训练（不管换成哪个base model）都会混入，
+                                              # 保证身份/边界不会因为蒸馏数据里恰好没提到而丢失
+    subagent_identity_anchors_dir: "memory/identity/subagents"  # 每个子agent专属身份锚定
+    refined_corpus_path: "memory/knowledge/refined_corpus.jsonl"      # migrate/distill_training_corpus.py
+                                              # 定期产出的精炼语料，去重时优先级高于原始流水账
+    self_distillation_path: "memory/knowledge/self_distillation.jsonl"  # migrate/self_distillation.py
+                                              # 换base model前主动探测"旧大脑"产出的快照语料
+    min_new_samples_to_train: 4            # 攒够多少条新蒸馏样本才值得跑一次训练
+                                              # 注：4是小规模联调用的值，正式日常训练建议调大
+                                              # （比如100~150），样本太少容易过拟合到几句话
+    eval_set_path: "data/eval/eval_set.jsonl"
+    max_seq_len: 1024
+    epochs: 2
+    lr: 0.0002
+    lora_r: 16
+    lora_alpha: 32
+    
+tts:
+  # TTS 服务启动命令,一般不用改
+  command: ["python", "tts_server.py"]
+  cwd: "."
+  # TTS 服务监听端口,和 chat 后端调用时要一致
+  port: 8001
+  # 使用的 CosyVoice 内置音色,先跑一遍 list_voices.py 看看有哪些可选
+  # 常见选项: 中文男 / 中文女 / 英文男 / 英文女 / 日语男 / 粤语女 / 韩语女
+  voice_name: "中文女"
+  # 模型路径,和 download_model.py 里保持一致即可
+  model_dir: "pretrained_models/CosyVoice-300M-SFT"
+  version: "v1"
+
